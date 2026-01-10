@@ -5,9 +5,8 @@
  * O: Player two's token
  * '': No token in the square
  */
-
 const Cell = () => {
-    let value = '';
+    let value = null;
 
     /**
      * Helper variables to help with game logic
@@ -74,19 +73,78 @@ const GameBoard = (() => {
     // Adds a new token to the board
     const addPlayerToken = (row, column, playerToken) => {
 
+        if (playerToken !== "X" && playerToken !== "O") {
+            return false;
+        }
+
         if (row < 0 || row >= boardRows || column < 0 || column >= boardColumns) {
             return false;
         }
 
         const cell = board[row][column];
 
-        if (cell.getToken() !== '') {
+        if (cell.getToken() !== null) {
             return false;
         }
 
         cell.addToken(playerToken);
         return true;
     }
+
+    // Check if the GameBoard is viable
+    // Will serve as the win condition check
+    const winningBoardState = () => {
+
+        // Check for a win condition in the horizontal direction
+        for (let i = 0; i < boardRows; i++) {
+            let c = 0;
+            const t0 = board[i][c].getToken();
+            const t1 = board[i][c + 1].getToken();
+            const t2 = board[i][c + 2].getToken();
+
+            if (t0 !== null && t0 === t1 && t0 === t2) {
+                console.log("GameOver Horizontally Man");
+                return false;
+            }
+
+        }
+
+        // Check for a win condition in the vertical direction
+        for (let i = 0; i < boardColumns; i++) {
+            let r = 0;
+            const t0 = board[r][i].getToken();
+            const t1 = board[r + 1][i].getToken();
+            const t2 = board[r + 2][i].getToken();
+
+            if (t0 !== null && t0 === t1 && t0 === t2) {
+                console.log("GameOver Vertically Man");
+                return false;
+            }
+
+        }
+
+        // Check for a win condition at the diagonals
+        const r = 1;
+        const c = 1;
+        const middle = board[r][c].getToken();
+        const topRight = board[r - 1][c + 1].getToken();
+        const bottomLeft = board[r + 1][c - 1].getToken();
+        const bottomRight = board[r + 1][c + 1].getToken();
+        const topLeft = board[r - 1][c - 1].getToken();
+
+        // Check bottom left to top right diagonal
+        if (middle !== null && middle === bottomLeft && middle === topRight) { return false; }
+
+        // Check bottom right to top left diagonal
+        if (middle !== null && middle === bottomRight && middle === topLeft) { return false; }
+
+        return true;
+    }
+
+    // Draw state is false if a single cell contains a null value
+    // And true if every cell contains a value
+    const drawBoardState = () => board.every((row) => row.every((cell) => cell.getToken() !== null));
+
 
     // Prints a copy of the board
     const getBoardSnapShot = () => {
@@ -95,9 +153,87 @@ const GameBoard = (() => {
         return boardSnapshot;
     }
 
-    return { resetGameBoard, addPlayerToken, getBoardSnapShot };
+    return { resetGameBoard, addPlayerToken, getBoardSnapShot, winningBoardState, drawBoardState };
 })();
 
-const GameController = () => { }
+/* 
+** The GameController will be responsible for controlling the 
+** flow and state of the game's turns, as well as whether
+** anybody has won the game
+*/
+const GameController = (() => {
+
+    // Players are also going to be stored in objects
+    const playerOneName = "Player One";
+    const playerTwoName = "Player Two";
+
+    const players = [
+        {
+            name: playerOneName,
+            token: "X"
+        },
+        {
+            name: playerTwoName,
+            token: "O"
+        },
+    ]
+
+    // As usual player one will be the active player
+    let activePlayer = players[0];
+
+    // Getter to get the active player
+    const getActivePlayer = () => { return activePlayer };
+
+    // Change active player - used when switching turns
+    const changeActivePlayer = () => {
+        activePlayer === players[0] ? activePlayer = players[1]
+            : activePlayer = players[0];
+    }
+
+    // Temporary function for testing
+    const printRound = () => {
+        // Print the board
+        GameBoard.getBoardSnapShot();
+
+        // Print player's turn
+        console.log(`It is ${getActivePlayer().name}'s turn.`)
+    }
+
+    const playRound = (playerRow, playerColumn) => {
+
+        // Add active player's token to the board
+        const tokenAdded = GameBoard.addPlayerToken(playerRow, playerColumn, getActivePlayer().token);
+
+        // If token added then check win condition
+        if (tokenAdded) {
+
+            // Check win condition - left incomplete for now
+            const viableGame = true;
+
+            // Switch the current player and start a new round if token added and game still viable
+            console.log(
+                `Dropping ${getActivePlayer().name}'s token into row ${playerRow} and column ${playerColumn}`
+            );
+            GameBoard.winningBoardState();
+            changeActivePlayer();
+            printRound();
+
+        }
+        else {
+            // Redo
+            printRound();
+        }
+    }
+
+
+
+    // Init function to start the game
+    // Final version must not be an IIFE
+    // Since it returns undefined we can just cut out the middleman and use printRound()
+    // Fine for testing purposes
+    const init = (() => { printRound() })();
+
+    return { getActivePlayer, changeActivePlayer, playRound, init }
+})();
 
 const DisplayController = () => { }
