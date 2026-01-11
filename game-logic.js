@@ -167,7 +167,7 @@ const GameBoardState = () => {
     // Draw state is false if a single cell contains a null value
     // And true if every cell contains a value
     const hasDrawBoardState = () => {
-        if (tokenSnapshot.every((row) => row.every((value) => value !== null)) && hasWinnerBoardState() !== true) { return true; }
+        if (tokenSnapshot.every((row) => row.every((value) => value !== null))) { return true; }
         return false;
     }
 
@@ -222,29 +222,37 @@ const GameController = (() => {
         // Add active player's token to the board
         const tokenAdded = GameBoard.addPlayerToken(playerRow, playerColumn, getActivePlayer().token);
 
-        // If token added then check win condition
+        // If token added then check win and draw conditions
         if (tokenAdded) {
 
-            // Check win condition - left incomplete for now
-            const viableGame = true;
+            const gameWon = GameBoardState.hasWinnerBoardState();
 
-            // Switch the current player and start a new round if token added and game still viable
-            console.log(
-                `Dropping ${getActivePlayer().name}'s token into row ${playerRow} and column ${playerColumn}`
-            );
-            GameBoard.winningBoardState();
-            changeActivePlayer();
-            printRound();
+            if (!gameWon) {
+                // Check for a draw state
+                const gameDrawn = GameBoardState.hasDrawBoardState();
 
+                if (!gameDrawn) {
+                    // Switch the current player and start a new round if token added and game still viable
+                    console.log(`Dropping ${getActivePlayer().name}'s token into row ${playerRow} and column ${playerColumn}`);
+                    changeActivePlayer();
+                    printRound();
+                }
+                else {
+                    // Placeholder
+                    console.log("GAME OVER - DRAW")
+                }
+            }
+            else {
+                // Placeholder
+                console.log("GAME OVER - DRAW")
+            }
         }
         else {
-            // Redo
+            // Since the token addition fail, return the current player's turn and redo the round
             printRound();
         }
     }
-
-
-
+    
     // Init function to start the game
     // Final version must not be an IIFE
     // Since it returns undefined we can just cut out the middleman and use printRound()
