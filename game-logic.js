@@ -91,61 +91,6 @@ const GameBoard = (() => {
         return true;
     }
 
-    // Check if the GameBoard is viable
-    // Will serve as the win condition check
-    const winningBoardState = () => {
-
-        // Check for a win condition in the horizontal direction
-        for (let i = 0; i < boardRows; i++) {
-            let c = 0;
-            const t0 = board[i][c].getToken();
-            const t1 = board[i][c + 1].getToken();
-            const t2 = board[i][c + 2].getToken();
-
-            if (t0 !== null && t0 === t1 && t0 === t2) {
-                console.log("GameOver Horizontally Man");
-                return false;
-            }
-
-        }
-
-        // Check for a win condition in the vertical direction
-        for (let i = 0; i < boardColumns; i++) {
-            let r = 0;
-            const t0 = board[r][i].getToken();
-            const t1 = board[r + 1][i].getToken();
-            const t2 = board[r + 2][i].getToken();
-
-            if (t0 !== null && t0 === t1 && t0 === t2) {
-                console.log("GameOver Vertically Man");
-                return false;
-            }
-
-        }
-
-        // Check for a win condition at the diagonals
-        const r = 1;
-        const c = 1;
-        const middle = board[r][c].getToken();
-        const topRight = board[r - 1][c + 1].getToken();
-        const bottomLeft = board[r + 1][c - 1].getToken();
-        const bottomRight = board[r + 1][c + 1].getToken();
-        const topLeft = board[r - 1][c - 1].getToken();
-
-        // Check bottom left to top right diagonal
-        if (middle !== null && middle === bottomLeft && middle === topRight) { return false; }
-
-        // Check bottom right to top left diagonal
-        if (middle !== null && middle === bottomRight && middle === topLeft) { return false; }
-
-        return true;
-    }
-
-    // Draw state is false if a single cell contains a null value
-    // And true if every cell contains a value
-    const drawBoardState = () => board.every((row) => row.every((cell) => cell.getToken() !== null));
-
-
     // Prints a copy of the board
     const getBoardSnapShot = () => {
         const boardSnapshot = board.map(boardRow => boardRow.map(cell => cell.getToken()));
@@ -153,8 +98,64 @@ const GameBoard = (() => {
         return boardSnapshot;
     }
 
-    return { resetGameBoard, addPlayerToken, getBoardSnapShot, winningBoardState, drawBoardState };
+    return { resetGameBoard, addPlayerToken, getBoardSnapShot };
 })();
+
+const GameBoardState = () => {
+
+    const boardRows = 3;
+    const boardColumns = 3;
+
+    // Check if the board has been won in all directions
+    const hasWinnerBoardState = () => {
+
+        // Check for a win condition in the horizontal direction
+        for (let i = 0; i < boardRows; i++) {
+            let c = 0;
+            const t0 = GameBoard.getBoardSnapShot()[i][c].getToken();
+            const t1 = GameBoard.getBoardSnapShot()[i][c + 1].getToken();
+            const t2 = GameBoard.getBoardSnapShot()[i][c + 2].getToken();
+
+            if (t0 !== null && t0 === t1 && t0 === t2) { return true; }
+        }
+
+        // Check for a win condition in the vertical direction
+        for (let i = 0; i < boardColumns; i++) {
+            let r = 0;
+            const t0 = GameBoard.getBoardSnapShot()[r][i].getToken();
+            const t1 = GameBoard.getBoardSnapShot()[r + 1][i].getToken();
+            const t2 = GameBoard.getBoardSnapShot()[r + 2][i].getToken();
+
+            if (t0 !== null && t0 === t1 && t0 === t2) { return true; }
+        }
+
+        // Check for a win condition at the diagonals
+        const r = 1;
+        const c = 1;
+        const middle = GameBoard.getBoardSnapShot[r][c].getToken();
+        const topRight = GameBoard.getBoardSnapShot[r - 1][c + 1].getToken();
+        const bottomLeft = GameBoard.getBoardSnapShot[r + 1][c - 1].getToken();
+        const bottomRight = GameBoard.getBoardSnapShot[r + 1][c + 1].getToken();
+        const topLeft = GameBoard.getBoardSnapShot[r - 1][c - 1].getToken();
+
+        // Check bottom left to top right diagonal
+        if (middle !== null && middle === bottomLeft && middle === topRight) { return true; }
+
+        // Check bottom right to top left diagonal
+        if (middle !== null && middle === bottomRight && middle === topLeft) { return true; }
+
+        return false;
+    }
+
+    // Draw state is false if a single cell contains a null value
+    // And true if every cell contains a value
+    const hasDrawBoardState = () => {
+        if (board.every((row) => row.every((cell) => cell.getToken() !== null))) { return true; }
+        return false;
+    }
+
+    return { hasDrawBoardState, hasWinnerBoardState };
+}
 
 /* 
 ** The GameController will be responsible for controlling the 
