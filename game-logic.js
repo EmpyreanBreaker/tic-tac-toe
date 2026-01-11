@@ -98,13 +98,30 @@ const GameBoard = (() => {
         return boardSnapshot;
     }
 
-    return { resetGameBoard, addPlayerToken, getBoardSnapShot };
+    // Return Gameboard dimensions
+    const getGameBoardDimensions = () => ({
+        getBoardRows: () => boardRows,
+        getBoardColumns: () => boardColumns
+    });
+
+    return { resetGameBoard, addPlayerToken, getBoardSnapShot, getGameBoardDimensions };
 })();
 
+
+/**
+ * The GameboardState is a helper function to handle win or draw conditions
+ * Each square holds a Cell
+ */
 const GameBoardState = () => {
 
-    const boardRows = 3;
-    const boardColumns = 3;
+    // Get board dimensions
+    const boardRows = GameBoard.getGameBoardDimensions().getBoardRows();
+    const boardColumns = GameBoard.getGameBoardDimensions().getBoardColumns();
+
+    // Snapshot doesn't contain cells
+    // It contains the values of each cell directly
+    // So we can just use the index operators to access the values
+    const tokenSnapshot = GameBoard.getBoardSnapShot();
 
     // Check if the board has been won in all directions
     const hasWinnerBoardState = () => {
@@ -112,9 +129,9 @@ const GameBoardState = () => {
         // Check for a win condition in the horizontal direction
         for (let i = 0; i < boardRows; i++) {
             let c = 0;
-            const t0 = GameBoard.getBoardSnapShot()[i][c].getToken();
-            const t1 = GameBoard.getBoardSnapShot()[i][c + 1].getToken();
-            const t2 = GameBoard.getBoardSnapShot()[i][c + 2].getToken();
+            const t0 = tokenSnapshot[i][c];
+            const t1 = tokenSnapshot[i][c + 1];
+            const t2 = tokenSnapshot[i][c + 2];
 
             if (t0 !== null && t0 === t1 && t0 === t2) { return true; }
         }
@@ -122,9 +139,9 @@ const GameBoardState = () => {
         // Check for a win condition in the vertical direction
         for (let i = 0; i < boardColumns; i++) {
             let r = 0;
-            const t0 = GameBoard.getBoardSnapShot()[r][i].getToken();
-            const t1 = GameBoard.getBoardSnapShot()[r + 1][i].getToken();
-            const t2 = GameBoard.getBoardSnapShot()[r + 2][i].getToken();
+            const t0 = tokenSnapshot[r][i];
+            const t1 = tokenSnapshot[r + 1][i];
+            const t2 = tokenSnapshot[r + 2][i];
 
             if (t0 !== null && t0 === t1 && t0 === t2) { return true; }
         }
@@ -132,11 +149,11 @@ const GameBoardState = () => {
         // Check for a win condition at the diagonals
         const r = 1;
         const c = 1;
-        const middle = GameBoard.getBoardSnapShot[r][c].getToken();
-        const topRight = GameBoard.getBoardSnapShot[r - 1][c + 1].getToken();
-        const bottomLeft = GameBoard.getBoardSnapShot[r + 1][c - 1].getToken();
-        const bottomRight = GameBoard.getBoardSnapShot[r + 1][c + 1].getToken();
-        const topLeft = GameBoard.getBoardSnapShot[r - 1][c - 1].getToken();
+        const middle = tokenSnapshot[r][c];
+        const topRight = tokenSnapshot[r - 1][c + 1];
+        const bottomLeft = tokenSnapshot[r + 1][c - 1];
+        const bottomRight = tokenSnapshot[r + 1][c + 1];
+        const topLeft = tokenSnapshot[r - 1][c - 1];
 
         // Check bottom left to top right diagonal
         if (middle !== null && middle === bottomLeft && middle === topRight) { return true; }
@@ -150,7 +167,7 @@ const GameBoardState = () => {
     // Draw state is false if a single cell contains a null value
     // And true if every cell contains a value
     const hasDrawBoardState = () => {
-        if (board.every((row) => row.every((cell) => cell.getToken() !== null))) { return true; }
+        if (tokenSnapshot.every((row) => row.every((value) => value !== null)) && hasWinnerBoardState() !== true) { return true; }
         return false;
     }
 
