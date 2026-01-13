@@ -160,7 +160,10 @@ const GameBoardState = (() => {
         return false;
     }
 
-    return { hasDrawBoardState, hasWinnerBoardState };
+    // 
+    const hasViableGameState = (tokenSnapshot) => !(hasWinnerBoardState(tokenSnapshot) || hasDrawBoardState(tokenSnapshot));
+
+    return { hasDrawBoardState, hasWinnerBoardState, hasViableGameState };
 })();
 
 /* 
@@ -202,43 +205,65 @@ const GameController = (() => {
         console.log(`It is ${getActivePlayer().name}'s turn.`)
     }
 
+    // We start with a viable game board state
+    let viableGameBoardState = true;
+
     const playRound = (playerRow, playerColumn) => {
 
-        // Add active player's token to the board
-        const tokenAdded = GameBoard.addPlayerToken(playerRow, playerColumn, getActivePlayer().token);
+        if (viableGameBoardState) {
+            // Add active player's token to the board
+            const tokenAdded = GameBoard.addPlayerToken(playerRow, playerColumn, getActivePlayer().token);
 
-        // If token added then check win and draw conditions
-        if (tokenAdded === true) {
-            const tokenSnapshot = GameBoard.getBoardSnapShot();
+            // If token added then check win and draw conditions
+            if (tokenAdded) {
+                const tokenSnapshot = GameBoard.getBoardSnapShot();
 
-            let gameWon = GameBoardState.hasWinnerBoardState(tokenSnapshot);
+                let gameWon = GameBoardState.hasWinnerBoardState(tokenSnapshot);
 
-            if (gameWon === false) {
-                // Check for a draw state
-                let gameDrawn = GameBoardState.hasDrawBoardState(tokenSnapshot);
+                if (!gameWon) {
+                    // Check for a draw state
+                    let gameDrawn = GameBoardState.hasDrawBoardState(tokenSnapshot);
 
-                if (gameDrawn === false) {
-                    // Switch the current player and start a new round if token added and game still viable
-                    console.log(`Dropping ${getActivePlayer().name}'s token into row ${playerRow} and column ${playerColumn}`);
-                    changeActivePlayer();
-                    printRound();
+                    if (!gameDrawn) {
+                        // Switch the current player and start a new round if token added and game still viable
+                        console.log(`Dropping ${getActivePlayer().name}'s token into row ${playerRow} and column ${playerColumn}`);
+                        changeActivePlayer();
+                        printRound();
+                    }
+                    else {
+                        // Placeholder
+                        console.log("GAME OVER - DRAW")
+                        console.table(GameBoard.getBoardSnapShot());
+                    }
                 }
                 else {
                     // Placeholder
-                    console.log("GAME OVER - DRAW")
+                    console.log("GAME OVER - GAMEWON")
                     console.table(GameBoard.getBoardSnapShot());
                 }
+                viableGameBoardState = GameBoardState.hasViableGameState(tokenSnapshot);
             }
             else {
-                // Placeholder
-                console.log("GAME OVER - GAMEWON")
-                console.table(GameBoard.getBoardSnapShot());
+                // Since the token addition fail, return the current player's turn and redo the round
+                printRound();
             }
         }
         else {
-            // Since the token addition fail, return the current player's turn and redo the round
-            printRound();
+            console.log("REJECTED - GAME STATE NOT VIABLE")
+            console.table(GameBoard.getBoardSnapShot());
+            return;
         }
+    }
+
+    // Reset The Board
+    // Reset Gamestate
+    const startNewGame = () => {
+        console.log("RESETTING IT ALL!!!!!!");
+        // Reset the board and input new cells
+        GameBoard.resetGameBoard();
+        // Reset Gameboard state to true
+        viableGameBoardState = true;
+        // 
     }
 
     // Init function to start the game
@@ -247,7 +272,7 @@ const GameController = (() => {
     // Fine for testing purposes
     const init = (() => { printRound() })();
 
-    return { getActivePlayer, changeActivePlayer, playRound, init }
+    return { init, playRound, startNewGame }
 })();
 
 const DisplayController = () => { }
