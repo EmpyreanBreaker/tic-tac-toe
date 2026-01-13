@@ -31,7 +31,7 @@ const Cell = () => {
     }
 
     // Use closure to interact with local variables
-    return { getToken, addToken, getIndices, setIndices };
+    return { addToken, getIndices, setIndices, getToken };
 }
 
 /**
@@ -42,9 +42,7 @@ const Cell = () => {
  * resetGameBoard(): Returns nothing but allows us to generate a new board
  * resetGameBoard() doesn't return anything. It resets the board and state on call
  * addPlayerToken(): Allows us to add tokens to the board
- * getBoardSnapShot(): For UI. We send a snapshot of the board
- * This protects the actual board from being exposed
- * While allowing us to render a copy of the board to the UI
+ * getBoardSnapShot(): Creates a copy of the board for UI purposes without exposing the real board
  */
 const GameBoard = (() => {
     // We begin with an empty game board
@@ -56,6 +54,8 @@ const GameBoard = (() => {
     const resetGameBoard = () => {
         // Empty the current content of board first for a fresh game state
         board.length = 0;
+
+        // Populate the board with Cells
         for (let r = 0; r < boardRows; r++) {
             // Create an empty array inside our array
             board.push([]);
@@ -73,30 +73,21 @@ const GameBoard = (() => {
     // Adds a new token to the board
     const addPlayerToken = (row, column, playerToken) => {
 
-        if (playerToken !== "X" && playerToken !== "O") {
-            return false;
-        }
+        if (playerToken !== "X" && playerToken !== "O") { return false; }
 
-        if (row < 0 || row >= boardRows || column < 0 || column >= boardColumns) {
-            return false;
-        }
+        if (row < 0 || row >= boardRows || column < 0 || column >= boardColumns) { return false; }
 
         const cell = board[row][column];
 
-        if (cell.getToken() !== null) {
-            return false;
-        }
+        if (cell.getToken() !== null) { return false; }
 
         cell.addToken(playerToken);
+
         return true;
     }
 
-    // Prints a copy of the board
-    const getBoardSnapShot = () => {
-        const boardSnapshot = board.map(boardRow => boardRow.map(cell => cell.getToken()));
-        console.table(boardSnapshot);
-        return boardSnapshot;
-    }
+    // Creates and returns a copy of the board
+    const getBoardSnapShot = () => board.map(boardRow => boardRow.map(cell => cell.getToken()));
 
     // Return Gameboard dimensions
     const getGameBoardDimensions = () => ({
@@ -104,7 +95,7 @@ const GameBoard = (() => {
         getBoardColumns: () => boardColumns
     });
 
-    return { resetGameBoard, addPlayerToken, getBoardSnapShot, getGameBoardDimensions };
+    return { addPlayerToken, getBoardSnapShot, getGameBoardDimensions, resetGameBoard };
 })();
 
 
@@ -112,20 +103,18 @@ const GameBoard = (() => {
  * The GameboardState is a helper function to handle win or draw conditions
  * Each square holds a Cell
  */
-const GameBoardState = () => {
+const GameBoardState = (() => {
 
     // Get board dimensions
-    const boardRows = GameBoard.getGameBoardDimensions().getBoardRows();
-    const boardColumns = GameBoard.getGameBoardDimensions().getBoardColumns();
-
-    // Snapshot doesn't contain cells
-    // It contains the values of each cell directly
-    // So we can just use the index operators to access the values
-    const tokenSnapshot = GameBoard.getBoardSnapShot();
+    const gameBoardDimensions = GameBoard.getGameBoardDimensions();
+    const boardRows = gameBoardDimensions.getBoardRows();
+    const boardColumns = gameBoardDimensions.getBoardColumns();
 
     // Check if the board has been won in all directions
-    const hasWinnerBoardState = () => {
-
+    const hasWinnerBoardState = (tokenSnapshot) => {
+        // Snapshot doesn't contain cells
+        // It contains the values of each cell directly
+        // So we can just use the index operators to access the values
         // Check for a win condition in the horizontal direction
         for (let i = 0; i < boardRows; i++) {
             let c = 0;
@@ -166,13 +155,13 @@ const GameBoardState = () => {
 
     // Draw state is false if a single cell contains a null value
     // And true if every cell contains a value
-    const hasDrawBoardState = () => {
+    const hasDrawBoardState = (tokenSnapshot) => {
         if (tokenSnapshot.every((row) => row.every((value) => value !== null))) { return true; }
         return false;
     }
 
     return { hasDrawBoardState, hasWinnerBoardState };
-}
+})();
 
 /* 
 ** The GameController will be responsible for controlling the 
@@ -203,16 +192,12 @@ const GameController = (() => {
     const getActivePlayer = () => { return activePlayer };
 
     // Change active player - used when switching turns
-    const changeActivePlayer = () => {
-        activePlayer === players[0] ? activePlayer = players[1]
-            : activePlayer = players[0];
-    }
+    const changeActivePlayer = () => activePlayer === players[0] ? activePlayer = players[1] : activePlayer = players[0];
 
     // Temporary function for testing
     const printRound = () => {
         // Print the board
-        GameBoard.getBoardSnapShot();
-
+        console.table(GameBoard.getBoardSnapShot());
         // Print player's turn
         console.log(`It is ${getActivePlayer().name}'s turn.`)
     }
@@ -223,15 +208,16 @@ const GameController = (() => {
         const tokenAdded = GameBoard.addPlayerToken(playerRow, playerColumn, getActivePlayer().token);
 
         // If token added then check win and draw conditions
-        if (tokenAdded) {
+        if (tokenAdded === true) {
+            const tokenSnapshot = GameBoard.getBoardSnapShot();
 
-            const gameWon = GameBoardState.hasWinnerBoardState();
+            let gameWon = GameBoardState.hasWinnerBoardState(tokenSnapshot);
 
-            if (!gameWon) {
+            if (gameWon === false) {
                 // Check for a draw state
-                const gameDrawn = GameBoardState.hasDrawBoardState();
+                let gameDrawn = GameBoardState.hasDrawBoardState(tokenSnapshot);
 
-                if (!gameDrawn) {
+                if (gameDrawn === false) {
                     // Switch the current player and start a new round if token added and game still viable
                     console.log(`Dropping ${getActivePlayer().name}'s token into row ${playerRow} and column ${playerColumn}`);
                     changeActivePlayer();
@@ -240,11 +226,13 @@ const GameController = (() => {
                 else {
                     // Placeholder
                     console.log("GAME OVER - DRAW")
+                    console.table(GameBoard.getBoardSnapShot());
                 }
             }
             else {
                 // Placeholder
-                console.log("GAME OVER - DRAW")
+                console.log("GAME OVER - GAMEWON")
+                console.table(GameBoard.getBoardSnapShot());
             }
         }
         else {
@@ -252,7 +240,7 @@ const GameController = (() => {
             printRound();
         }
     }
-    
+
     // Init function to start the game
     // Final version must not be an IIFE
     // Since it returns undefined we can just cut out the middleman and use printRound()
