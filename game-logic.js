@@ -1,33 +1,33 @@
 /**
  * A Cell represents one 'square' on the board
- * A Cell's value can have three possibilities
+ * A Cell's token can have three possibilities
  * X: Player one's token
  * O: Player two's token
- * '': No token in the square
+ *  : Null
  */
 const Cell = () => {
-    let value = null;
 
-    /**
-     * Helper variables to help with game logic
-     * With this we can enable winning condition checks
-     */
-    let rowIndex = 0;
-    let colIndex = 0;
+    // Holds token values for the game board
+    let token = null;
+
+    // Helper variables to help with game logic
+    // With this we can enable winning condition checks
+    let cellRowIndex = 0;
+    let cellColumnIndex = 0;
 
     //Getter: Return the token value held in the cell
-    const getToken = () => value;
+    const getToken = () => token;
 
     // Setter: Accept's a player's token to change the value of the cell
-    const addToken = (playerToken) => value = playerToken;
+    const addToken = (playerToken) => token = playerToken;
 
-    // Getter: Return the index values of the cell in an object
-    const getIndices = () => ({ colIndex, rowIndex })
+    // Getter: Return the index values of the cell
+    const getIndices = () => ({ cellRowIndex, cellColumnIndex })
 
     // Setter: Set the index values of the cell in an object
     const setIndices = (row, col) => {
-        rowIndex = row;
-        colIndex = col;
+        cellRowIndex = row;
+        cellColumnIndex = col;
     }
 
     // Use closure to interact with local variables
@@ -38,11 +38,7 @@ const Cell = () => {
  * The Gameboard represents the state of the board
  * Each square holds a Cell
  * GameBoard is an IIFE so everything inside it executes immediately which gives us an immediate object
- * containing three methods:
- * resetGameBoard(): Returns nothing but allows us to generate a new board
- * resetGameBoard() doesn't return anything. It resets the board and state on call
- * addPlayerToken(): Allows us to add tokens to the board
- * getBoardSnapShot(): Creates a copy of the board for UI purposes without exposing the real board
+ * containing Gameboard methods:
  */
 const GameBoard = (() => {
     // We begin with an empty game board
@@ -54,15 +50,14 @@ const GameBoard = (() => {
     const resetGameBoard = () => {
         // Empty the current content of board first for a fresh game state
         board.length = 0;
-
         // Populate the board with Cells
-        for (let r = 0; r < boardRows; r++) {
+        for (let row = 0; row < boardRows; row++) {
             // Create an empty array inside our array
             board.push([]);
-            for (let c = 0; c < boardColumns; c++) {
+            for (let column = 0; column < boardColumns; column++) {
                 const cell = Cell();
-                cell.setIndices(r, c);
-                board[r].push(cell);
+                cell.setIndices(row, column);
+                board[row].push(cell);
             }
         }
     }
@@ -86,8 +81,17 @@ const GameBoard = (() => {
         return true;
     }
 
-    // Creates and returns a copy of the board
-    const getBoardSnapShot = () => board.map(boardRow => boardRow.map(cell => cell.getToken()));
+    // Creates a copy of the board and a snapshot of the tokens
+    const getBoardSnapShot = () => {
+        const boardSnapshot = board.map((boardRow) => boardRow.map((cell) => ({
+            cellRowIndex: cell.getIndices().cellRowIndex,
+            cellColumnIndex: cell.getIndices().cellColumnIndex,
+            token: cell.getToken(),
+        })));
+
+        const tokenSnapshot = boardSnapshot.map((boardRow) => boardRow.map((cell) => cell.token));
+        return { boardSnapshot, tokenSnapshot }
+    };
 
     // Return Gameboard dimensions
     const getGameBoardDimensions = () => ({
@@ -112,15 +116,12 @@ const GameBoardState = (() => {
 
     // Check if the board has been won in all directions
     const hasWinnerBoardState = (tokenSnapshot) => {
-        // Snapshot doesn't contain cells
-        // It contains the values of each cell directly
-        // So we can just use the index operators to access the values
         // Check for a win condition in the horizontal direction
         for (let i = 0; i < boardRows; i++) {
             let c = 0;
-            const t0 = tokenSnapshot[i][c];
-            const t1 = tokenSnapshot[i][c + 1];
-            const t2 = tokenSnapshot[i][c + 2];
+            const t0 = tokenSnapshot[i][c].token;
+            const t1 = tokenSnapshot[i][c + 1].token;
+            const t2 = tokenSnapshot[i][c + 2].token;
 
             if (t0 !== null && t0 === t1 && t0 === t2) { return true; }
         }
@@ -128,9 +129,9 @@ const GameBoardState = (() => {
         // Check for a win condition in the vertical direction
         for (let i = 0; i < boardColumns; i++) {
             let r = 0;
-            const t0 = tokenSnapshot[r][i];
-            const t1 = tokenSnapshot[r + 1][i];
-            const t2 = tokenSnapshot[r + 2][i];
+            const t0 = tokenSnapshot[r][i].token;
+            const t1 = tokenSnapshot[r + 1][i].token;
+            const t2 = tokenSnapshot[r + 2][i].token;
 
             if (t0 !== null && t0 === t1 && t0 === t2) { return true; }
         }
@@ -138,11 +139,11 @@ const GameBoardState = (() => {
         // Check for a win condition at the diagonals
         const r = 1;
         const c = 1;
-        const middle = tokenSnapshot[r][c];
-        const topRight = tokenSnapshot[r - 1][c + 1];
-        const bottomLeft = tokenSnapshot[r + 1][c - 1];
-        const bottomRight = tokenSnapshot[r + 1][c + 1];
-        const topLeft = tokenSnapshot[r - 1][c - 1];
+        const middle = tokenSnapshot[r][c].token;
+        const topRight = tokenSnapshot[r - 1][c + 1].token;
+        const bottomLeft = tokenSnapshot[r + 1][c - 1].token;
+        const bottomRight = tokenSnapshot[r + 1][c + 1].token;
+        const topLeft = tokenSnapshot[r - 1][c - 1].token;
 
         // Check bottom left to top right diagonal
         if (middle !== null && middle === bottomLeft && middle === topRight) { return true; }
@@ -154,9 +155,9 @@ const GameBoardState = (() => {
     }
 
     // Draw state is false if a single cell contains a null value
-    // And true if every cell contains a value
+    // And true if every cell contains a non null value
     const hasDrawBoardState = (tokenSnapshot) => {
-        if (tokenSnapshot.every((row) => row.every((value) => value !== null))) { return true; }
+        if (tokenSnapshot.every((boardRow) => boardRow.every((cell) => cell.token !== null))) { return true; }
         return false;
     }
 
@@ -200,7 +201,7 @@ const GameController = (() => {
     // Temporary function for testing
     const printRound = () => {
         // Print the board
-        console.table(GameBoard.getBoardSnapShot());
+        console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
         // Print player's turn
         console.log(`It is ${getActivePlayer().name}'s turn.`)
     }
@@ -216,7 +217,7 @@ const GameController = (() => {
 
             // If token added then check win and draw conditions
             if (tokenAdded) {
-                const tokenSnapshot = GameBoard.getBoardSnapShot();
+                const tokenSnapshot = GameBoard.getBoardSnapShot().boardSnapshot;
 
                 let gameWon = GameBoardState.hasWinnerBoardState(tokenSnapshot);
 
@@ -233,13 +234,13 @@ const GameController = (() => {
                     else {
                         // Placeholder
                         console.log("GAME OVER - DRAW")
-                        console.table(GameBoard.getBoardSnapShot());
+                        console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
                     }
                 }
                 else {
                     // Placeholder
                     console.log("GAME OVER - GAMEWON")
-                    console.table(GameBoard.getBoardSnapShot());
+                    console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
                 }
                 viableGameBoardState = GameBoardState.hasViableGameState(tokenSnapshot);
             }
@@ -250,7 +251,7 @@ const GameController = (() => {
         }
         else {
             console.log("REJECTED - GAME STATE NOT VIABLE")
-            console.table(GameBoard.getBoardSnapShot());
+            console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
             return;
         }
     }
@@ -275,4 +276,25 @@ const GameController = (() => {
     return { init, playRound, startNewGame }
 })();
 
-const DisplayController = () => { }
+const DisplayController = (() => {
+    // Grab the elements from index.html that we need
+    const gameUI = document.querySelector(".game-board");
+
+    // Grab the game elements that we need
+    const board = GameBoard.getBoardSnapShot().boardSnapshot;
+
+    // Draw the board to the UI
+    board.forEach((boardRow) => boardRow.forEach((cell) => {
+        // Create the button
+        const cellButton = document.createElement("button");
+
+        // Build the button
+        cellButton.classList.add("game-board__cell");
+        cellButton.textContent = cell.token ?? "";
+        cellButton.setAttribute("data-cell-row-index", cell.cellRowIndex);
+        cellButton.setAttribute("data-cell-column-index", cell.cellColumnIndex);
+
+        // Append the button
+        gameUI.append(cellButton);
+    }))
+})();
