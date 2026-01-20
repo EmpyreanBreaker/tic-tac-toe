@@ -1,0 +1,20 @@
+
+/* .game {
+    height: 100%;
+    width: 100%;
+    --minor: calc(100vmin / 10);
+    --major: calc(var(--minor) * 2);
+    background-color: #e8e2ea;
+    background-image:
+        linear-gradient(to right, rgba(0, 0, 0, 0.12)1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.12)1px, transparent 1px),
+        linear-gradient(to right, rgba(0, 0, 0, 0.24)1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.24)1px, transparent 1px);
+    background-size:
+        var(--minor) var(--minor),
+        var(--minor) var(--minor),
+        var(--major) var(--major),
+        var(--major) var(--major);
+}
+/
+/**BACKGROUND DESIGN**/

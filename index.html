@@ -5,14 +5,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Tic-Tac-Toe</title>
-    <script src="game-logic.js" defer></script>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <script src="js/game-logic.js" defer></script>
+    <link href="/styles/reset-style.css" rel="stylesheet" type="text/css" />
+    <link href="/styles/design-style.css" rel="stylesheet" type="text/css" />
+    <link href="/styles/grid-style.css" rel="stylesheet" type="text/css" />
 </head>
 
-<body>
-    <div class="container">
-        <h1 class="player turn"></h1>
-        <div class="game-board"></div>
+<body class="game">
+    <div class="game__container">
+        <div class="game__header"></div>
+        <div class="game__sidebar"></div>
+        <div class="game__main">
+            <h1 class="player turn"></h1>
+            <div class="game-board"></div>
+        </div>
+        <div class="game__footer"></div>
     </div>
 </body>
 
