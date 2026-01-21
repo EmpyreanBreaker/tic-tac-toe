@@ -10,12 +10,6 @@
     margin: 0;
 }
 
-/* Ensure % heights work and the page can fill the viewport */
-html,
-body {
-    height: 100%;
-}
-
 /* 3. Enable keyword animations */
 @media (prefers-reduced-motion: no-preference) {
     html {

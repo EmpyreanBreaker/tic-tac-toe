@@ -72,6 +72,8 @@ const GameBoard = (() => {
 
         if (row < 0 || row >= boardRows || column < 0 || column >= boardColumns) { return false; }
 
+        console.log(row)
+        console.log("this column: " + column)
         const cell = board[row][column];
 
         if (cell.getToken() !== null) { return false; }
@@ -278,23 +280,49 @@ const GameController = (() => {
 
 const DisplayController = (() => {
     // Grab the elements from index.html that we need
-    const gameUI = document.querySelector(".game-board");
+    const gameUI = document.querySelector(".game__main");
 
-    // Grab the game elements that we need
-    const board = GameBoard.getBoardSnapShot().boardSnapshot;
+    const updateScreen = () => {
+        // Clear the board
+        gameUI.textContent = "";
 
-    // Draw the board to the UI
-    board.forEach((boardRow) => boardRow.forEach((cell) => {
-        // Create the button
-        const cellButton = document.createElement("button");
+        // Get the newest version of the board and player turn
+        const board = GameBoard.getBoardSnapShot().boardSnapshot;
 
-        // Build the button
-        cellButton.classList.add("game-board__cell");
-        cellButton.textContent = cell.token ?? "";
-        cellButton.setAttribute("data-cell-row-index", cell.cellRowIndex);
-        cellButton.setAttribute("data-cell-column-index", cell.cellColumnIndex);
+        // Display player's turn
+        /**TODO */
 
-        // Append the button
-        gameUI.append(cellButton);
-    }))
+        //Render the board
+        board.forEach((boardRow) => boardRow.forEach((cell) => {
+            // Create the button
+            const cellButton = document.createElement("button");
+
+            // Build the button
+            cellButton.classList.add("game__main-cell");
+            cellButton.textContent = cell.token ?? "";
+            cellButton.setAttribute("data-cell-row-index", cell.cellRowIndex);
+            cellButton.setAttribute("data-cell-column-index", cell.cellColumnIndex);
+
+            // Append the button
+            gameUI.append(cellButton);
+        }))
+    }
+
+    // Initial Render
+    updateScreen();
+
+    // Add event listener for the board
+    gameUI.addEventListener("click", (e) => {
+        const cell = e.target.closest(".game__main-cell");
+        if (!cell) return;
+
+        const row = Number(cell.dataset.cellRowIndex);
+        const col = Number(cell.dataset.cellColumnIndex);
+
+        console.log(row);
+
+        GameController.playRound(row, col);
+        updateScreen();
+    });
+
 })();

@@ -1,4 +1,3 @@
-
 /* .game {
     height: 100%;
     width: 100%;
@@ -18,3 +17,8 @@
 }
 /
 /**BACKGROUND DESIGN**/
+/* Ensure % heights work and the page can fill the viewport */
+html,
+body {
+    height: 100%;
+}
