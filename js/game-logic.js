@@ -176,6 +176,9 @@ const GameBoardState = (() => {
 */
 const GameController = (() => {
 
+    // We start with a viable game board state
+    let viableGameBoardState = true;
+
     // Players are also going to be stored in objects
     const playerOneName = "Player One";
     const playerTwoName = "Player Two";
@@ -183,22 +186,28 @@ const GameController = (() => {
     const players = [
         {
             name: playerOneName,
-            token: "X"
+            token: "X",
+            winner: false
         },
         {
             name: playerTwoName,
-            token: "O"
+            token: "O",
+            winner: false
         },
     ]
-
-    // As usual player one will be the active player
-    let activePlayer = players[0];
 
     // Getter to get the active player
     const getActivePlayer = () => { return activePlayer };
 
     // Change active player - used when switching turns
     const changeActivePlayer = () => activePlayer === players[0] ? activePlayer = players[1] : activePlayer = players[0];
+
+    const changeAllPlayerStatus = (status) => players.forEach(player => player.winner = status);
+
+    const getAllPlayerStatus = () => ({ playerOneStatus: players[0].winner, playerTwoStatus: players[1].winner });
+
+    // As usual player one will be the active player
+    let activePlayer = players[0];
 
     // Temporary function for testing
     const printRound = () => {
@@ -207,9 +216,6 @@ const GameController = (() => {
         // Print player's turn
         console.log(`It is ${getActivePlayer().name}'s turn.`)
     }
-
-    // We start with a viable game board state
-    let viableGameBoardState = true;
 
     const playRound = (playerRow, playerColumn) => {
 
@@ -237,12 +243,15 @@ const GameController = (() => {
                         // Placeholder
                         console.log("GAME OVER - DRAW")
                         console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
+                        // Mark both winner status as true for a game draw
+                        changeAllPlayerStatus(true);
                     }
                 }
                 else {
                     // Placeholder
                     console.log("GAME OVER - GAMEWON")
                     console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
+                    getActivePlayer().winner = true;
                 }
                 viableGameBoardState = GameBoardState.hasViableGameState(tokenSnapshot);
             }
@@ -266,7 +275,8 @@ const GameController = (() => {
         GameBoard.resetGameBoard();
         // Reset Gameboard state to true
         viableGameBoardState = true;
-        // 
+        // Reset all player status
+        changeAllPlayerStatus(false);
     }
 
     // Init function to start the game
@@ -275,14 +285,17 @@ const GameController = (() => {
     // Fine for testing purposes
     const init = (() => { printRound() })();
 
-    return { init, playRound, startNewGame }
+    return { init, playRound, getActivePlayer, getAllPlayerStatus, startNewGame }
 })();
 
 const DisplayController = (() => {
     // Grab the elements from index.html that we need
     const gameUI = document.querySelector(".game__main");
+    const gameStatus = document.querySelector(".game__status");
+    const playerOneStatus = document.querySelector(".game__player-x-status");
+    const playerTwoStatus = document.querySelector(".game__player-o-status");
 
-    const updateScreen = () => {
+    const updateGameScreen = () => {
         // Clear the board
         gameUI.textContent = "";
 
@@ -306,10 +319,43 @@ const DisplayController = (() => {
             // Append the button
             gameUI.append(cellButton);
         }))
+
+        updatePlayerBoards();
+        updateGameStatus();
+    }
+
+    const updatePlayerBoards = () => {
+        // Display play conditions
+        if (GameController.getActivePlayer().token === 'X') {
+            playerOneStatus.textContent = `It is ${GameController.getActivePlayer().name}'s turn.`
+            playerTwoStatus.textContent = "";
+        }
+        else {
+            playerTwoStatus.textContent = `It is ${GameController.getActivePlayer().name}'s turn.`;
+            playerOneStatus.textContent = "";
+        }
+    }
+
+    const updateGameStatus = () => {
+        // Display Win Or Draw conditions
+        const playerStatus = GameController.getAllPlayerStatus();
+        if (playerStatus.playerOneStatus === true && playerStatus.playerTwoStatus === true) {
+            gameStatus.textContent = `GAMEOVER - DRAW`
+        }
+
+        if (playerStatus.playerOneStatus === true && playerStatus.playerTwoStatus === false) {
+            gameStatus.textContent = `Player One Wins`
+            playerOneStatus.textContent = "";
+        }
+
+        if (playerStatus.playerOneStatus === false && playerStatus.playerTwoStatus === true) {
+            gameStatus.textContent = `Player Two Wins`
+            playerTwoStatus.textContent = "";
+        }
     }
 
     // Initial Render
-    updateScreen();
+    updateGameScreen();
 
     // Add event listener for the board
     gameUI.addEventListener("click", (e) => {
@@ -322,7 +368,7 @@ const DisplayController = (() => {
         console.log(row);
 
         GameController.playRound(row, col);
-        updateScreen();
-    });
 
+        updateGameScreen();
+    });
 })();
