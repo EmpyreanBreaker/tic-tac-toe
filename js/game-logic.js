@@ -158,15 +158,15 @@ const GameBoardState = (() => {
 
     // Draw state is false if a single cell contains a null value
     // And true if every cell contains a non null value
-    const hasDrawBoardState = (tokenSnapshot) => {
+    const hasDrawnBoardState = (tokenSnapshot) => {
         if (tokenSnapshot.every((boardRow) => boardRow.every((cell) => cell.token !== null))) { return true; }
         return false;
     }
 
     // 
-    const hasViableGameState = (tokenSnapshot) => !(hasWinnerBoardState(tokenSnapshot) || hasDrawBoardState(tokenSnapshot));
+    const hasViableGameState = (tokenSnapshot) => !(hasWinnerBoardState(tokenSnapshot) || hasDrawnBoardState(tokenSnapshot));
 
-    return { hasDrawBoardState, hasWinnerBoardState, hasViableGameState };
+    return { hasDrawnBoardState, hasWinnerBoardState, hasViableGameState };
 })();
 
 /* 
@@ -177,7 +177,12 @@ const GameBoardState = (() => {
 const GameController = (() => {
 
     // We start with a viable game board state
-    let viableGameBoardState = true;
+    let gameViable = true;
+
+    // Of course our first game isn't drawn
+    let gameDrawn = false;
+
+    let validPlacement = true;
 
     // Players are also going to be stored in objects
     const playerOneName = "Player One";
@@ -202,9 +207,15 @@ const GameController = (() => {
     // Change active player - used when switching turns
     const changeActivePlayer = () => activePlayer === players[0] ? activePlayer = players[1] : activePlayer = players[0];
 
-    const changeAllPlayerStatus = (status) => players.forEach(player => player.winner = status);
-
     const getAllPlayerStatus = () => ({ playerOneStatus: players[0].winner, playerTwoStatus: players[1].winner });
+
+    const resetPlayerStatus = () => players.forEach(player => player.winner = false);
+
+    const getGameDrawnStatus = () => gameDrawn;
+
+    const setDrawnStatus = () => gameDrawn = false;
+
+    const getValidPlacement = () => validPlacement;
 
     // As usual player one will be the active player
     let activePlayer = players[0];
@@ -219,32 +230,28 @@ const GameController = (() => {
 
     const playRound = (playerRow, playerColumn) => {
 
-        if (viableGameBoardState) {
+        if (gameViable) {
             // Add active player's token to the board
             const tokenAdded = GameBoard.addPlayerToken(playerRow, playerColumn, getActivePlayer().token);
 
             // If token added then check win and draw conditions
             if (tokenAdded) {
+
+                validPlacement = true;
+
                 const tokenSnapshot = GameBoard.getBoardSnapShot().boardSnapshot;
 
                 let gameWon = GameBoardState.hasWinnerBoardState(tokenSnapshot);
 
                 if (!gameWon) {
                     // Check for a draw state
-                    let gameDrawn = GameBoardState.hasDrawBoardState(tokenSnapshot);
+                    gameDrawn = GameBoardState.hasDrawnBoardState(tokenSnapshot);
 
                     if (!gameDrawn) {
                         // Switch the current player and start a new round if token added and game still viable
                         console.log(`Dropping ${getActivePlayer().name}'s token into row ${playerRow} and column ${playerColumn}`);
                         changeActivePlayer();
                         printRound();
-                    }
-                    else {
-                        // Placeholder
-                        console.log("GAME OVER - DRAW")
-                        console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
-                        // Mark both winner status as true for a game draw
-                        changeAllPlayerStatus(true);
                     }
                 }
                 else {
@@ -253,10 +260,11 @@ const GameController = (() => {
                     console.table(GameBoard.getBoardSnapShot().tokenSnapshot);
                     getActivePlayer().winner = true;
                 }
-                viableGameBoardState = GameBoardState.hasViableGameState(tokenSnapshot);
+                gameViable = GameBoardState.hasViableGameState(tokenSnapshot);
             }
             else {
                 // Since the token addition fail, return the current player's turn and redo the round
+                validPlacement = false;
                 printRound();
             }
         }
@@ -267,16 +275,18 @@ const GameController = (() => {
         }
     }
 
-    // Reset The Board
-    // Reset Gamestate
     const startNewGame = () => {
         console.log("RESETTING IT ALL!!!!!!");
         // Reset the board and input new cells
         GameBoard.resetGameBoard();
-        // Reset Gameboard state to true
-        viableGameBoardState = true;
-        // Reset all player status
-        changeAllPlayerStatus(false);
+        // Reset viable state to true
+        gameViable = true;
+        // Reset draw state to false
+        setDrawnStatus();
+        // Reset winner state to false
+        resetPlayerStatus();
+        // As usual player one will be the active player
+        activePlayer = players[0];
     }
 
     // Init function to start the game
@@ -285,7 +295,7 @@ const GameController = (() => {
     // Fine for testing purposes
     const init = (() => { printRound() })();
 
-    return { init, playRound, getActivePlayer, getAllPlayerStatus, startNewGame }
+    return { init, playRound, getActivePlayer, getAllPlayerStatus, getGameDrawnStatus, getValidPlacement, startNewGame, }
 })();
 
 const DisplayController = (() => {
@@ -294,6 +304,7 @@ const DisplayController = (() => {
     const gameStatus = document.querySelector(".game__status");
     const playerOneStatus = document.querySelector(".game__player-x-status");
     const playerTwoStatus = document.querySelector(".game__player-o-status");
+    const gameBarButton = document.querySelector(".game__reset-button");
 
     const updateGameScreen = () => {
         // Clear the board
@@ -327,11 +338,11 @@ const DisplayController = (() => {
     const updatePlayerBoards = () => {
         // Display play conditions
         if (GameController.getActivePlayer().token === 'X') {
-            playerOneStatus.textContent = `It is ${GameController.getActivePlayer().name}'s turn.`
+            playerOneStatus.textContent = `${GameController.getActivePlayer().name}'s turn.`
             playerTwoStatus.textContent = "";
         }
         else {
-            playerTwoStatus.textContent = `It is ${GameController.getActivePlayer().name}'s turn.`;
+            playerTwoStatus.textContent = `${GameController.getActivePlayer().name}'s turn.`;
             playerOneStatus.textContent = "";
         }
     }
@@ -339,18 +350,38 @@ const DisplayController = (() => {
     const updateGameStatus = () => {
         // Display Win Or Draw conditions
         const playerStatus = GameController.getAllPlayerStatus();
-        if (playerStatus.playerOneStatus === true && playerStatus.playerTwoStatus === true) {
+
+        const validStatus = GameController.getValidPlacement();
+
+        let gameDrawn = GameController.getGameDrawnStatus();
+
+        if (gameDrawn) {
             gameStatus.textContent = `GAMEOVER - DRAW`
+            playerOneStatus.textContent = "";
+            playerTwoStatus.textContent = "";
+            gameBarButton.hidden = false;
+            return;
         }
 
         if (playerStatus.playerOneStatus === true && playerStatus.playerTwoStatus === false) {
             gameStatus.textContent = `Player One Wins`
             playerOneStatus.textContent = "";
+            gameBarButton.hidden = false;
+            return;
         }
 
         if (playerStatus.playerOneStatus === false && playerStatus.playerTwoStatus === true) {
             gameStatus.textContent = `Player Two Wins`
             playerTwoStatus.textContent = "";
+            gameBarButton.hidden = false;
+            return;
+        }
+
+        if (!validStatus && !gameDrawn && playerStatus.playerOneStatus === false && playerStatus.playerTwoStatus === false) {
+            gameStatus.textContent = `INVALID PLACEMENT - PLEASE TRY AGAIN`;
+        }
+        else {
+            gameStatus.textContent = "Enjoy The Game!"
         }
     }
 
@@ -369,6 +400,12 @@ const DisplayController = (() => {
 
         GameController.playRound(row, col);
 
+        updateGameScreen();
+    });
+
+    // Reset the game
+    gameBarButton.addEventListener("click", (e) => {
+        GameController.startNewGame();
         updateGameScreen();
     });
 })();

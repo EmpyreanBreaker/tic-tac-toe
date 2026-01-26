@@ -3,14 +3,14 @@
     display: grid;
     grid-template-columns: 1fr 4fr 1fr;
     /** Should be auto 1fr auto as final adjustment**/
-    grid-template-rows: 1fr 4fr 1fr 1fr;
+    grid-template-rows: 1fr 4fr 0.5fr 0.5fr;
     height: 100vh;
     width: 100%;
     gap: 1rem;
     grid-template-areas:
         'header header header'
         'sidebar-x main sidebar-o'
-        'gameplay-bar gameplay-bar gameplay-bar'
+        'game-bar game-bar game-bar'
         'footer footer footer';
 }
 
@@ -35,9 +35,9 @@
     width: 100%;
 }
 
-.game__gameplay-bar {
+.game__bar {
     border: 1px solid green;
-    grid-area: gameplay-bar;
+    grid-area: game-bar;
     width: 100%;
 }
 
