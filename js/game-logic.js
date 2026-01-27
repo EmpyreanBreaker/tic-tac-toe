@@ -381,7 +381,7 @@ const DisplayController = (() => {
             gameStatus.textContent = `INVALID PLACEMENT - PLEASE TRY AGAIN`;
         }
         else {
-            gameStatus.textContent = "Enjoy The Game!"
+            gameStatus.textContent = "Welcome, Please Enter Your Usernames!"
         }
     }
 

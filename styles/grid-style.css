@@ -1,61 +1,59 @@
-/**OVERALL GRID**/
+/** OVERALL GRID **/
 .game__container {
     display: grid;
     grid-template-columns: 1fr 4fr 1fr;
-    /** Should be auto 1fr auto as final adjustment**/
     grid-template-rows: 1fr 4fr 0.5fr 0.5fr;
     height: 100vh;
     width: 100%;
     gap: 1rem;
     grid-template-areas:
-        'header header header'
-        'sidebar-x main sidebar-o'
-        'game-bar game-bar game-bar'
-        'footer footer footer';
+        "header   header   header"
+        "sidebarX main     sidebarO"
+        "gameBar  gameBar  gameBar"
+        "footer   footer   footer";
 }
 
 .game__header {
     grid-area: header;
     border: 1px solid red;
-    height: 100%;
-    width: 100%;
 }
 
-.game__sidebar-x {
-    grid-area: sidebar-x;
+.game__sidebar {
     border: 1px solid red;
-    height: 100%;
-    width: 100%;
 }
 
-.game__sidebar-o {
-    grid-area: sidebar-o;
-    border: 1px solid red;
-    height: 100%;
-    width: 100%;
+.game__sidebar--x {
+    grid-area: sidebarX;
+}
+
+.game__sidebar--o {
+    grid-area: sidebarO;
 }
 
 .game__bar {
+    grid-area: gameBar;
     border: 1px solid green;
-    grid-area: game-bar;
     width: 100%;
 }
 
 .game__footer {
     grid-area: footer;
     border: 1px solid red;
-    height: 100%;
-    width: 100%;
 }
 
-.game__main {
+/* BOTH start screen and board live in the "main" area */
+.game__start {
+    grid-area: main;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid rgb(157, 0, 255);
+}
+
+.game__board {
     grid-area: main;
     border: 5px solid blue;
-}
 
-/**MAIN**/
-
-.game__main {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
