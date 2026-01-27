@@ -309,7 +309,8 @@ const DisplayController = (() => {
     const gameStatus = document.querySelector(".game__status");
     const playerOneStatus = document.querySelector(".game__player-status--x");
     const playerTwoStatus = document.querySelector(".game__player-status--o");
-    const gameBarButton = document.querySelector(".game__button--reset");
+    const newRoundButton = document.querySelector(".game__button--reset");
+    const newGameButton = document.querySelector(".game__button--new-game");
     const dialogOpenButton = document.querySelector(".game__button--dialog-open");
     const dialogCloseButton = document.querySelector(".game__button--dialog-close");
     const gameDialog = document.querySelector(".game__dialog");
@@ -411,21 +412,24 @@ const DisplayController = (() => {
             gameStatus.textContent = `STALEMATE — SIGNAL JAMMED`
             playerOneStatus.textContent = "";
             playerTwoStatus.textContent = "";
-            gameBarButton.hidden = false;
+            newRoundButton.removeAttribute("hidden", "");
+            newGameButton.removeAttribute("hidden", "");
             return;
         }
 
         if (playerStatus.playerOneStatus === true && playerStatus.playerTwoStatus === false) {
             gameStatus.textContent = `${activePlayer.name} OWNS THE GRID.`
             playerOneStatus.textContent = "";
-            gameBarButton.hidden = false;
+            newRoundButton.removeAttribute("hidden", "");
+            newGameButton.removeAttribute("hidden", "");
             return;
         }
 
         if (playerStatus.playerOneStatus === false && playerStatus.playerTwoStatus === true) {
             gameStatus.textContent = `${activePlayer.name} OWNS THE GRID.`
             playerTwoStatus.textContent = "";
-            gameBarButton.hidden = false;
+            newRoundButton.removeAttribute("hidden", "");
+            newGameButton.removeAttribute("hidden", "");
             return;
         }
 
@@ -452,9 +456,15 @@ const DisplayController = (() => {
         updateGameScreen();
     });
 
-    // Reset the game
-    gameBarButton.addEventListener("click", (e) => {
+    // Reset the game for a new Round
+    newRoundButton.addEventListener("click", (e) => {
         GameController.startNewGame();
         updateGameScreen();
     });
+
+    // Reset the game for a new Game
+    newGameButton.addEventListener("click", (e) => {
+        GameController.startNewGame();
+        updateGameScreen();
+    })
 })();
