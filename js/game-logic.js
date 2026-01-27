@@ -201,8 +201,13 @@ const GameController = (() => {
         },
     ]
 
+    const setPlayerNames = (playerX, playerO) => {
+        players[0].name = playerX;
+        players[1].name = playerO;
+    }
+
     // Getter to get the active player
-    const getActivePlayer = () => { return activePlayer };
+    const getActivePlayer = () => activePlayer;
 
     // Change active player - used when switching turns
     const changeActivePlayer = () => activePlayer === players[0] ? activePlayer = players[1] : activePlayer = players[0];
@@ -295,26 +300,67 @@ const GameController = (() => {
     // Fine for testing purposes
     const init = (() => { printRound() })();
 
-    return { init, playRound, getActivePlayer, getAllPlayerStatus, getGameDrawnStatus, getValidPlacement, startNewGame, }
+    return { init, playRound, getActivePlayer, getAllPlayerStatus, getGameDrawnStatus, getValidPlacement, setPlayerNames, startNewGame, }
 })();
 
 const DisplayController = (() => {
     // Grab the elements from index.html that we need
-    const gameUI = document.querySelector(".game__main");
+    const gameBoardUI = document.querySelector(".game__board");
     const gameStatus = document.querySelector(".game__status");
-    const playerOneStatus = document.querySelector(".game__player-x-status");
-    const playerTwoStatus = document.querySelector(".game__player-o-status");
-    const gameBarButton = document.querySelector(".game__reset-button");
+    const playerOneStatus = document.querySelector(".game__player-status--x");
+    const playerTwoStatus = document.querySelector(".game__player-status--o");
+    const gameBarButton = document.querySelector(".game__button--reset");
+    const dialogOpenButton = document.querySelector(".game__button--dialog-open");
+    const dialogCloseButton = document.querySelector(".game__button--dialog-close");
+    const gameDialog = document.querySelector(".game__dialog");
+    const form = document.querySelector(".game__dialog-form");
+    const gameSidebar = document.querySelectorAll(".game__sidebar");
+
+    // Show dialog so users can input usernames
+    dialogOpenButton.addEventListener("click", () => {
+        gameDialog.showModal();
+        // Update Game status UI bar
+        gameStatus.textContent = "INPUT CALLSIGNS — SYNCING..."
+    });
+
+    // Close the dialog button and submit the entered usernames
+    dialogCloseButton.addEventListener("click", (e) => {
+        // Prevent default submission behavior
+        e.preventDefault();
+
+        // Validation won't run since we are preventing default behavior
+        // We enable it manually
+        if (!form.reportValidity()) { return };
+
+        // Grab the form data
+        const data = new FormData(form);
+
+        // Grab the players
+        const playerX = data.get("playerX").trim().toUpperCase();
+        const playerO = data.get("playerO").trim().toUpperCase();
+
+        // Test
+        console.log(playerX, playerO);
+
+        // Submit usernames
+        GameController.setPlayerNames(playerX, playerO);
+
+        // Show the sidebars and game board
+        gameSidebar.forEach((sidebar) => sidebar.removeAttribute("hidden", ""));
+        gameBoardUI.removeAttribute("hidden", "");
+
+        // Close the form and update the UI
+        gameDialog.close();
+        updatePlayerBoards();
+        gameStatus.textContent = "GOOD LUCK! THE SYSTEM IS WATCHING!!!"
+    });
 
     const updateGameScreen = () => {
         // Clear the board
-        gameUI.textContent = "";
+        gameBoardUI.textContent = "";
 
         // Get the newest version of the board and player turn
         const board = GameBoard.getBoardSnapShot().boardSnapshot;
-
-        // Display player's turn
-        /**TODO */
 
         //Render the board
         board.forEach((boardRow) => boardRow.forEach((cell) => {
@@ -328,7 +374,7 @@ const DisplayController = (() => {
             cellButton.setAttribute("data-cell-column-index", cell.cellColumnIndex);
 
             // Append the button
-            gameUI.append(cellButton);
+            gameBoardUI.append(cellButton);
         }))
 
         updatePlayerBoards();
@@ -336,18 +382,24 @@ const DisplayController = (() => {
     }
 
     const updatePlayerBoards = () => {
+        const activePlayer = GameController.getActivePlayer();
+
         // Display play conditions
-        if (GameController.getActivePlayer().token === 'X') {
-            playerOneStatus.textContent = `${GameController.getActivePlayer().name}'s turn.`
+        if (activePlayer.token === 'X') {
+            playerOneStatus.textContent = `${activePlayer.name}'s turn.`
             playerTwoStatus.textContent = "";
         }
         else {
-            playerTwoStatus.textContent = `${GameController.getActivePlayer().name}'s turn.`;
+            playerTwoStatus.textContent = `${activePlayer.name}'s turn.`;
             playerOneStatus.textContent = "";
         }
     }
 
     const updateGameStatus = () => {
+        // The welcome message on initial page load
+        gameStatus.textContent = "WELCOME, GLITCH GLADIATORS!"
+
+        const activePlayer = GameController.getActivePlayer();
         // Display Win Or Draw conditions
         const playerStatus = GameController.getAllPlayerStatus();
 
@@ -356,7 +408,7 @@ const DisplayController = (() => {
         let gameDrawn = GameController.getGameDrawnStatus();
 
         if (gameDrawn) {
-            gameStatus.textContent = `GAMEOVER - DRAW`
+            gameStatus.textContent = `STALEMATE — SIGNAL JAMMED`
             playerOneStatus.textContent = "";
             playerTwoStatus.textContent = "";
             gameBarButton.hidden = false;
@@ -364,24 +416,21 @@ const DisplayController = (() => {
         }
 
         if (playerStatus.playerOneStatus === true && playerStatus.playerTwoStatus === false) {
-            gameStatus.textContent = `Player One Wins`
+            gameStatus.textContent = `${activePlayer.name} OWNS THE GRID.`
             playerOneStatus.textContent = "";
             gameBarButton.hidden = false;
             return;
         }
 
         if (playerStatus.playerOneStatus === false && playerStatus.playerTwoStatus === true) {
-            gameStatus.textContent = `Player Two Wins`
+            gameStatus.textContent = `${activePlayer.name} OWNS THE GRID.`
             playerTwoStatus.textContent = "";
             gameBarButton.hidden = false;
             return;
         }
 
         if (!validStatus && !gameDrawn && playerStatus.playerOneStatus === false && playerStatus.playerTwoStatus === false) {
-            gameStatus.textContent = `INVALID PLACEMENT - PLEASE TRY AGAIN`;
-        }
-        else {
-            gameStatus.textContent = "Welcome, Please Enter Your Usernames!"
+            gameStatus.textContent = `ACCESS DENIED — TRY ANOTHER NODE`;
         }
     }
 
@@ -389,7 +438,7 @@ const DisplayController = (() => {
     updateGameScreen();
 
     // Add event listener for the board
-    gameUI.addEventListener("click", (e) => {
+    gameBoardUI.addEventListener("click", (e) => {
         const cell = e.target.closest(".game__main-cell");
         if (!cell) return;
 

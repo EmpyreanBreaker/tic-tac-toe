@@ -15,12 +15,12 @@
     <div class="game__container">
         <div class="game__header"></div>
 
-        <aside class="game__sidebar game__sidebar--x">
+        <aside class="game__sidebar game__sidebar--x" hidden>
             <h1 class="game__player game__player--x">P1</h1>
             <h2 class="game__player-status game__player-status--x"></h2>
         </aside>
 
-        <aside class="game__sidebar game__sidebar--o">
+        <aside class="game__sidebar game__sidebar--o" hidden>
             <h1 class="game__player game__player--o">P2</h1>
             <h2 class="game__player-status game__player-status--o"></h2>
         </aside>
@@ -45,9 +45,7 @@
                         <input class="game__input" id="player-o" name="playerO" type="text" required minlength="4">
                     </div>
 
-                    <button class="game__button game__button--dialog-close">
-                        Start Game
-                    </button>
+                    <button class="game__button game__button--dialog-close" type="submit">Start Game</button>
                 </form>
             </dialog>
         </section>
@@ -58,6 +56,7 @@
         <div class="game__bar">
             <h1 class="game__status">Enjoy The Game!</h1>
             <button class="game__button game__button--reset" hidden>Start New Round</button>
+            <button class="maYBE use the same class as dialog open" hidden>Start New Game</button>
         </div>
 
         <div class="game__footer"></div>
