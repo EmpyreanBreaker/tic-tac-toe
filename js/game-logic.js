@@ -304,6 +304,9 @@ const GameController = (() => {
 })();
 
 const DisplayController = (() => {
+
+    /****************** HELPER VARIABLES **********************/
+
     // Grab the elements from index.html that we need
     const gameBoardUI = document.querySelector(".game__board");
     const gameStatus = document.querySelector(".game__status");
@@ -317,12 +320,41 @@ const DisplayController = (() => {
     const form = document.querySelector(".game__dialog-form");
     const gameSidebar = document.querySelectorAll(".game__sidebar");
 
+    /****************** END HELPER VARIABLES **********************/
+
+    /****************** HELPER FUNCTIONS **********************/
+
     // Show dialog so users can input usernames
-    dialogOpenButton.addEventListener("click", () => {
+    // Helper function
+    const openPlayerDialog = () => {
         gameDialog.showModal();
         // Update Game status UI bar
         gameStatus.textContent = "INPUT CALLSIGNS — SYNCING..."
-    });
+    }
+
+    // Show the sidebars and game board
+    const showGameElenets = () => {
+        gameSidebar.forEach((sidebar) => sidebar.removeAttribute("hidden", ""));
+        gameBoardUI.removeAttribute("hidden", "");
+    }
+
+    // Hide the sidebars and game board
+    const hideGameElements = () => {
+        gameSidebar.forEach((sidebar) => sidebar.setAttribute("hidden", ""));
+        gameBoardUI.setAttribute("hidden", "");
+    }
+
+    const hideButtonElements = () => {
+        newRoundButton.setAttribute("hidden", "");
+        newGameButton.setAttribute("hidden", "");
+    }
+
+    // Open the dialog
+    dialogOpenButton.addEventListener("click", () => openPlayerDialog());
+
+    /****************** END HELPER FUNCTIONS **********************/
+
+    /****************** GAMEPLAY FUNCTIONS **********************/
 
     // Close the dialog button and submit the entered usernames
     dialogCloseButton.addEventListener("click", (e) => {
@@ -347,13 +379,14 @@ const DisplayController = (() => {
         GameController.setPlayerNames(playerX, playerO);
 
         // Show the sidebars and game board
-        gameSidebar.forEach((sidebar) => sidebar.removeAttribute("hidden", ""));
-        gameBoardUI.removeAttribute("hidden", "");
+        showGameElenets();
 
         // Close the form and update the UI
         gameDialog.close();
         updatePlayerBoards();
         gameStatus.textContent = "GOOD LUCK! THE SYSTEM IS WATCHING!!!"
+        // Update and display the game screen
+        updateGameScreen();
     });
 
     const updateGameScreen = () => {
@@ -438,9 +471,6 @@ const DisplayController = (() => {
         }
     }
 
-    // Initial Render
-    updateGameScreen();
-
     // Add event listener for the board
     gameBoardUI.addEventListener("click", (e) => {
         const cell = e.target.closest(".game__main-cell");
@@ -458,13 +488,26 @@ const DisplayController = (() => {
 
     // Reset the game for a new Round
     newRoundButton.addEventListener("click", (e) => {
+        // Reset the board
         GameController.startNewGame();
+        // Hide button elements
+        hideButtonElements();
         updateGameScreen();
     });
 
     // Reset the game for a new Game
     newGameButton.addEventListener("click", (e) => {
+        // Reset the board
         GameController.startNewGame();
-        updateGameScreen();
+        // Hide game elements
+        hideGameElements();
+        // Hide button elements
+        hideButtonElements();
+        // Reopen the input dialog
+        openPlayerDialog();
+
     })
+
+    /****************** END GAMEPLAY FUNCTIONS **********************/
+
 })();
