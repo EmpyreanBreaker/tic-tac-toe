@@ -402,7 +402,7 @@ const DisplayController = (() => {
             const cellButton = document.createElement("button");
 
             // Build the button
-            cellButton.classList.add("game__main-cell");
+            cellButton.classList.add("game__board--cell");
             cellButton.textContent = cell.token ?? "";
             cellButton.setAttribute("data-cell-row-index", cell.cellRowIndex);
             cellButton.setAttribute("data-cell-column-index", cell.cellColumnIndex);
@@ -473,7 +473,7 @@ const DisplayController = (() => {
 
     // Add event listener for the board
     gameBoardUI.addEventListener("click", (e) => {
-        const cell = e.target.closest(".game__main-cell");
+        const cell = e.target.closest(".game__board--cell");
         if (!cell) return;
 
         const row = Number(cell.dataset.cellRowIndex);

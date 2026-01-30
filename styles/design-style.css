@@ -45,15 +45,34 @@ body {
 
 * {
     font-family: 'Rubik Glitch', 'Times New Roman', Times, serif;
+    color: white;
+    background-color: #070A12;
 }
 
 [hidden] {
     display: none !important;
 }
 
-.game__header > h1 {
+.game__header {
+    border: 0.5rem solid #111A2E;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    padding-inline: 1rem;
+}
+
+.game__header>h1 {
     font-size: 8rem;
     font-family: 'Rubik Glitch', 'Times New Roman', Times, serif;
+}
+
+.game__header>h1 {
+    font-size: 8rem;
+    font-family: 'Rubik Glitch', 'Times New Roman', Times, serif;
+}
+
+.game__sidebar {
+    border: 0.25rem solid #111A2E;
 }
 
 .game__sidebar>h1 {
@@ -62,4 +81,30 @@ body {
 
 .game__sidebar>h2 {
     font-size: 2rem;
+}
+
+.game__start,
+.game__board {
+    border: 0.25rem solid #111A2E;
+}
+
+.game__board--cell {
+    font-size: 3rem;
+    border-color: white;
+}
+
+.game__board--cell:hover {
+    border-color: blue;
+}
+
+.game__bar {
+    border: 0.25rem solid #111A2E;
+}
+
+.game__bar>h1 {
+    font-size: 2rem;
+}
+
+.game__footer {
+    border: 0.25rem solid #111A2E;
 }

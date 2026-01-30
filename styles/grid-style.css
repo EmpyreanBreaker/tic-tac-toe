@@ -3,9 +3,10 @@
     display: grid;
     grid-template-columns: 1fr 4fr 1fr;
     grid-template-rows: 1fr 4fr 0.5fr 0.5fr;
+    gap: 0.25rem;
     height: 100vh;
     width: 100%;
-    gap: 1rem;
+
     grid-template-areas:
         "header   header   header"
         "sidebarX main     sidebarO"
@@ -18,13 +19,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid red;
-    min-height: 0;
-    min-width: 0;
 }
 
 .game__sidebar {
-    border: 1px solid red;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -39,32 +36,40 @@
     grid-area: sidebarO;
 }
 
-.game__bar {
-    grid-area: gameBar;
-    border: 1px solid green;
-    width: 100%;
-}
-
-.game__footer {
-    grid-area: footer;
-    border: 1px solid red;
-}
-
-/* BOTH start screen and board live in the "main" area */
 .game__start {
     grid-area: main;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid rgb(157, 0, 255);
 }
 
 .game__board {
     grid-area: main;
-    border: 5px solid blue;
-
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    gap: 0.5rem;
+    gap: 0.25rem;
+}
+
+.game__bar {
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    grid-area: gameBar;
+    width: 100%;
+}
+
+.game__status--container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game__button--container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game__footer {
+    grid-area: footer;
 }
