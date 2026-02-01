@@ -1,8 +1,8 @@
 /**FONT STYLES **/
 @font-face {
     font-family: 'Rubik Glitch';
-    src: url('/fonts/Rubik-Glitch/RubikGlitch-Regular.woff2') format('woff2'),
-        url('/fonts/Rubik-Glitch/RubikGlitch-Regular.woff') format('woff');
+    src: url('./fonts/Rubik-Glitch/RubikGlitch-Regular.woff2') format('woff2'),
+        url('./fonts/Rubik-Glitch/RubikGlitch-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -10,8 +10,8 @@
 
 @font-face {
     font-family: 'Rubik Glitch Pop';
-    src: url('/fonts/Rubik-Glitch-Pop/RubikGlitchPop-Regular.woff2') format('woff2'),
-        url('/fonts/Rubik-Glitch-Pop/RubikGlitchPop-Regular.woff') format('woff');
+    src: url('./fonts/Rubik-Glitch-Pop/RubikGlitchPop-Regular.woff2') format('woff2'),
+        url('./fonts/Rubik-Glitch-Pop/RubikGlitchPop-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
