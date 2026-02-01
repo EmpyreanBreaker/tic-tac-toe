@@ -431,7 +431,7 @@ const DisplayController = (() => {
 
     const updateGameStatus = () => {
         // The welcome message on initial page load
-        gameStatus.textContent = "WELCOME, GLITCH GLADIATORS!"
+        gameStatus.textContent = "SECURE THE GRID // EARN YOUR GLITCH, GLADIATOR!"
 
         const activePlayer = GameController.getActivePlayer();
         // Display Win Or Draw conditions

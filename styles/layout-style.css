@@ -43,6 +43,23 @@
     align-items: center;
 }
 
+.game__dialog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.game__dialog-title {
+    align-self: center;
+}
+
+.game__field {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+}
+
 .game__board {
     grid-area: main;
     display: grid;
@@ -54,14 +71,16 @@
 .game__bar {
     display: grid;
     grid-template-columns: 1fr 4fr 1fr;
+    gap: 1rem;
     grid-area: gameBar;
     width: 100%;
 }
 
 .game__status--container {
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    min-width: 0;
 }
 
 .game__button--container {
@@ -72,4 +91,8 @@
 
 .game__footer {
     grid-area: footer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
